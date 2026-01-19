@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>บันทึกหลาย Order</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; text-align: center; }
+        .container {
+            max-width: 900px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        .order-item {
+            border: 1px solid #e0e0e0;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 6px;
+            background-color: #f9f9f9;
+            position: relative;
+        }
+        .order-item h3 {
+            margin-top: 0;
+            color: #555;
+            border-bottom: 1px dashed #ccc;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        .form-group label {
+            flex: 1 1 120px; /* Label takes minimum 120px, can grow */
+            font-weight: bold;
+            color: #555;
+            align-self: center;
+        }
+        .form-group input,
+        .form-group select {
+            flex: 2 1 200px; /* Input takes minimum 200px, can grow */
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 1rem;
+        }
+        .form-row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 15px;
+            flex-wrap: wrap; /* Allow wrapping on smaller screens */
+        }
+        .form-row .form-group {
+            flex: 1; /* Each group takes equal space */
+            margin-bottom: 0;
+        }
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .buttons button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s ease;
+        }
+        .add-button {
+            background-color: #28a745;
+            color: white;
+        }
+        .add-button:hover {
+            background-color: #218838;
+        }
+        .save-button {
+            background-color: #007bff;
+            color: white;
+        }
+        .save-button:hover {
+            background-color: #0056b3;
+        }
+        .remove-button {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            opacity: 0.8;
+        }
+        .remove-button:hover {
+            background-color: #c82333;
+            opacity: 1;
+        }
+        .message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 10px;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .error {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 10px;
+            border: 1px solid #f5c6cb;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>บันทึกข้อมูล Order หลายรายการ</h1>
+
+        <% if (message) { %>
+            <div class="message"><%= message %></div>
+        <% } %>
+        <% if (error) { %>
+            <div class="error"><%= error %></div>
+        <% } %>
+
+        <form id="orderForm" action="/save-orders" method="POST">
+            <div id="orderItemsContainer">
+                </div>
+
+            <div class="buttons">
+                <button type="button" id="addOrderItem" class="add-button">เพิ่มรายการ Order</button>
+                <button type="submit" class="save-button">บันทึก Order ทั้งหมด</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        let orderCount = 0; // Keep track of the number of order items
+
+        function addOrderItem() {
+            const container = document.getElementById('orderItemsContainer');
+            const newOrderItem = document.createElement('div');
+            newOrderItem.className = 'order-item';
+            newOrderItem.dataset.index = orderCount; // Store index for easy removal
+
+            newOrderItem.innerHTML = `
+                <h3>
+                    Order รายการที่ <span class="order-number">${orderCount + 1}</span>
+                    <button type="button" class="remove-button" onclick="removeOrderItem(${orderCount})">ลบรายการนี้</button>
+                </h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="orderId_${orderCount}">Order ID:</label>
+                        <input type="text" id="orderId_${orderCount}" name="orderId_${orderCount}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="customerName_${orderCount}">ชื่อลูกค้า:</label>
+                        <input type="text" id="customerName_${orderCount}" name="customerName_${orderCount}" required>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="productName_${orderCount}">ชื่อสินค้า:</label>
+                        <input type="text" id="productName_${orderCount}" name="productName_${orderCount}" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="quantity_${orderCount}">จำนวน:</label>
+                        <input type="number" id="quantity_${orderCount}" name="quantity_${orderCount}" required min="1" value="1">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="price_${orderCount}">ราคา:</label>
+                        <input type="number" id="price_${orderCount}" name="price_${orderCount}" required min="0" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="orderDate_${orderCount}">วันที่สั่ง:</label>
+                        <input type="date" id="orderDate_${orderCount}" name="orderDate_${orderCount}" value="${new Date().toISOString().split('T')[0]}" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="status_${orderCount}">สถานะ:</label>
+                    <select id="status_${orderCount}" name="status_${orderCount}">
+                        <option value="Pending">Pending</option>
+                        <option value="Completed">Completed</option>
+                        <option value="Cancelled">Cancelled</option>
+                    </select>
+                </div>
+            `;
+            container.appendChild(newOrderItem);
+            orderCount++;
+        }
+
+        function removeOrderItem(indexToRemove) {
+            const itemToRemove = document.querySelector(`.order-item[data-index="${indexToRemove}"]`);
+            if (itemToRemove) {
+                itemToRemove.remove();
+                // Re-index remaining items to ensure continuity in names if needed,
+                // but for simple append, this might not be strictly necessary
+                // unless you plan to use more complex logic on the server.
+                // For this example, we'll rely on the while loop in Node.js
+                // to collect items by checking for existing 'name_i' fields.
+
+                // Update the numbers displayed for the remaining orders
+                updateOrderNumbers();
+            }
+        }
+
+        function updateOrderNumbers() {
+            const orderItems = document.querySelectorAll('.order-item');
+            orderItems.forEach((item, index) => {
+                const orderNumberSpan = item.querySelector('.order-number');
+                if (orderNumberSpan) {
+                    orderNumberSpan.textContent = index + 1;
+                }
+            });
+            // No need to reset orderCount to 0, it just tracks the total added.
+            // The server-side loop handles missing indices gracefully.
+        }
+
+
+        // Add initial order item when page loads
+        document.addEventListener('DOMContentLoaded', () => {
+            addOrderItem(); // Add one order item by default
+            document.getElementById('addOrderItem').addEventListener('click', addOrderItem);
+        });
+
+    </script>
+</body>
+</html>

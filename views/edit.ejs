@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ปรับปรุงข้อมูล Order</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; font-size: 28px;}
+        form { background-color: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); max-width: 600px; margin: 20px auto; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; color: #555; }
+        input[type="text"],
+        input[type="number"],
+        input[type="date"],
+        select {
+            width: calc(100% - 22px); /* Adjust for padding and border */
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h1>ปรับปรุงข้อมูล Order (Order ID: <%= orderToEdit[0] %>)</h1>
+
+    <form action="/update" method="POST">
+        <input type="hidden" name="rowIndex" value="<%= rowIndex %>">
+
+        <% headers.forEach((header, index) => { %>
+            <div class="form-group">
+                <label for="<%= header.toLowerCase().replace(/\s/g, '') %>"><%= header %>:</label>
+                <% if (header === 'ขั้นตอน') { %>
+                    <select id="status" name="status">
+                        <option value="Pending" <%= orderToEdit[index] === 'Pending' ? 'selected' : '' %>>Pending</option>
+                        <option value="Completed" <%= orderToEdit[index] === 'Completed' ? 'selected' : '' %>>Completed</option>
+                        <option value="Cancelled" <%= orderToEdit[index] === 'Cancelled' ? 'selected' : '' %>>Cancelled</option>
+                    </select>
+                <% } else if (header === 'No') { %>
+                    <input type="number"
+                           id="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           name="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           value="<%= orderToEdit[index] %>"
+                           <%= 'readonly' %> >                    
+                <% } else if (header === 'จำนวน' || header === 'ราคา') { %>
+                    <input type="number"
+                           id="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           name="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           value="<%= orderToEdit[index] %>"
+                           <%= header === 'Order ID' ? 'readonly' : '' %> >
+                <% } else if (header === 'เวลาสั่ง') { %>
+                    <input type="date"
+                           id="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           name="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           value="<%= orderToEdit[index] %>"
+                           <%= 'readonly' %> >
+                <% } else { %>
+                    <input type="text"
+                           id="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           name="<%= header.toLowerCase().replace(/\s/g, '') %>"
+                           value="<%= orderToEdit[index] %>"
+                           <%= 'readonly' %> >
+                <% } %>
+            </div>
+        <% }); %>
+
+        <button type="submit">บันทึกการเปลี่ยนแปลง</button>
+    </form>
+</body>
+</html>

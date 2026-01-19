@@ -1,0 +1,17 @@
+{
+  "name": "food-order-web",
+  "version": "1.0.0",
+  "description": "Food order web application using Node.js, Express, and EJS",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "ejs": "^3.1.10",
+    "express": "^4.19.2",
+    "googleapis": "^152.0.0"
+  }
+}

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ยืนยันการสั่งซื้อ</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ขอบคุณ</h1>
+        <div class="order-details-summary">
+            <p><strong>หมายเลขออเดอร์:</strong> <%= order.id %></p>
+            <p><strong>โต๊ะ:</strong> <%= order.deliveryAddress %></p>
+            <p><strong>วันที่:</strong> <%= new Date(order.orderDate).toLocaleString() %></p>
+            <p><strong>สถานะ:</strong> <%= order.status %></p>
+
+            <h2>รายการอาหารที่สั่ง:</h2>
+            <ul>
+                <% order.items.forEach(item => { %>
+                    <li><%= item.name %> x <%= item.quantity %> = <%= item.subtotal %> บาท</li>
+                <% }); %>
+            </ul>
+            <h3>ยอดรวม: <%= order.totalAmount %> บาท</h3>
+        </div>
+        <p><a href="/">สั่งอาหารเพิ่มเติม</a></p>
+    </div>
+</body>
+</html>

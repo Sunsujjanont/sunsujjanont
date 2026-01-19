@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>สั่งอาหาร</title>
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>เมนูอาหาร ร้านเดอะบอย ชอบยิ้ม</h1>
+        <form action="/main" method="POST">
+            <button type="submit">Menu</button>
+        </form>         
+
+        
+        <form action="/submit-order" method="POST" class="order-form">
+            <div class="customer-info">
+                <h2>ข้อมูลลูกค้า</h2>
+                <div class="form-group">
+                    <label for="deliveryAddress">โต๊ะ:</label>
+                    <input id="deliveryAddress" name="deliveryAddress" required>
+                </div>
+            </div>
+                        
+            <div class="menu-list">
+                <% menu.forEach(item => { %>                    
+                    <div class="menu-item">                        
+                        <%= item.name %>ราคา: <%= item.price %> บาท                                               
+                        <div class="quantity-control">
+                            <img src="<%= item.image %>" alt="<%= item.name %>">                                                     
+                            <input type='hidden' id="item-<%= item.id %>" name="items[<%= item.id %>]" value="1" placeholder="จำนวน" onchange="calculateTotal()">
+                            <button type="submit" class="submit-button">สั่งอาหาร</button> 
+                        </div>
+                    </div>
+                <% }); %>
+            </div>
+            </form>
+            
+            <hr>
+
+            <div class="order-summary">
+                <p>ราคารวม: <span id="totalAmount">0</span> บาท</p>                
+            </div>
+
+    </div>
+
+    <script>
+        // JavaScript สำหรับคำนวณราคารวม
+        const menuData = <%- JSON.stringify(menu) %>; // ส่งข้อมูลเมนูจาก Node.js มาให้ JS ฝั่ง client
+        
+        function calculateTotal() {
+            let total = 0;
+            const quantityInputs = document.querySelectorAll('.quantity-control input[type="number"]');
+            
+            quantityInputs.forEach(input => {
+                const menuId = parseInt(input.name.match(/\d+/)[0]); // ดึง ID จาก name="items[ID]"
+                const quantity = parseInt(input.value);
+                
+                const menuItem = menuData.find(item => item.id === menuId);
+                
+                if (menuItem && quantity > 0) {
+                    total += menuItem.price * quantity;
+                }
+            });
+            
+            document.getElementById('totalAmount').textContent = total;
+        }
+
+        // เรียกใช้ calculateTotal() เมื่อโหลดหน้าเว็บครั้งแรก เผื่อมีค่าเริ่มต้น
+        document.addEventListener('DOMContentLoaded', calculateTotal);
+    </script>
+</body>
+</html>

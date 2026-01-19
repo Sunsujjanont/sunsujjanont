@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Google Sheet Data</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        h1 { color: #333; font-size: 26px;}
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; background-color: #fff; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1); }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: left; }
+        th { background-color: #4CAF50; color: white; }
+        tr:nth-child(even) { background-color: #f2f2f2; }
+        tr:hover { background-color: #ddd; }
+    </style>
+</head>
+<body>
+    <h1>รายการอาหาร (สถานะ: <%= currentFilter === 'all' ? 'ทั้งหมด' : currentFilter === 'completed' ? 'เสร็จแล้ว' : currentFilter === 'cancelled' ? 'ยกเลิก' : 'กำลังทำ' %>)</h1>
+    <div class="filter-buttons">
+        <button onclick="window.location.href='/main/?status=all'" class="<%= currentFilter === 'All' ? 'active' : '' %>">แสดงทั้งหมด</button>
+        <button onclick="window.location.href='/main/?status=pending'" class="<%= currentFilter === 'pending' ? 'active' : '' %>">กำลังทำ</button>
+        <button onclick="window.location.href='/main/?status=completed'" class="<%= currentFilter === 'completed' ? 'active' : '' %>">เสร็จแล้ว</button>
+        <button onclick="window.location.href='/main/?status=cancelled'" class="<%= currentFilter === 'cancelled' ? 'active' : '' %>">ยกเลิก</button>
+    </div>
+    <% if (sheetData && sheetData.length > 0) { %>
+        <table>
+            <thead>
+                <tr>
+                    <% // แสดง Header จากแถวแรกของข้อมูล (ถ้ามี) %>
+                    <% headers.forEach(header => { %>                
+                        <th><%= header %></th>                       
+                    <% }); %>                    
+                </tr>              
+            </thead>
+            <tbody>
+                <% // วนลูปแสดงข้อมูล เริ่มตั้งแต่แถวที่สอง (แถวแรกคือ Header) %>
+                <% for (let i = 0; i < sheetData.length; i++) { %>
+                    <tr>
+                        <% sheetData[i].forEach(cell => { %>                     
+                                <td><%= cell %></td>                                                                                
+                        <% }); %>
+                        <td>
+                        <form action="/updatec" method="GET">
+                            <input type="hidden" name="rowIndex" value="<%= sheetData[i][0] %>">
+                            <button type="submit">Completed</button>
+                        </form>     
+                        </td>                         
+                        <td>
+                        <form action="/update" method="GET">
+                            <input type="hidden" name="rowIndex" value="<%= sheetData[i][0] %>">
+                            <button type="submit">ปรับปรุง</button>
+                        </form>     
+                        </td>                          
+                    </tr>
+                <% } %>
+            </tbody>
+        </table>
+    <% } else { %>
+        <p>ไม่พบข้อมูลใน Google Sheet หรือเกิดข้อผิดพลาดในการโหลดข้อมูล</p>
+    <% } %>
+</body>
+</html>
